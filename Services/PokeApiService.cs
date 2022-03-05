@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text.Json;
+using Newtonsoft.Json;
 using System.Linq;
 using System;
 
@@ -11,10 +11,25 @@ public class PokeApiService{
         httpClient = new HttpClient();
     }
 
-    public async Task<PokemonEndpointResponse> GetAllPokemon(){
+    public async Task<IEnumerable<Pokemon>> GetAllPokemon(){
         var response = await httpClient.GetAsync("https://pokeapi.co/api/v2/pokemon-species");
         var responseContent = await response.Content.ReadAsStringAsync();
 
-        return JsonSerializer.Deserialize<PokemonEndpointResponse>(responseContent);
+        var allPokemon = JsonConvert.DeserializeObject<PokemonEndpointResponse>(responseContent);
+
+        var firstPokemonUrl = allPokemon.Results.First().Url;
+        var pokemonTasks = allPokemon.Results.Select(r => GetPokemonTask(r.Url));
+
+        await Task.WhenAll(pokemonTasks);
+
+        return pokemonTasks.Select(task => task.Result);        
+    }
+
+    private async Task<Pokemon> GetPokemonTask(string url){
+        var response = await httpClient.GetAsync(url);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var pokemonResponse = JsonConvert.DeserializeObject<PokemonInformationResponse>(responseContent);
+
+        return new Pokemon(pokemonResponse);
     }
 }

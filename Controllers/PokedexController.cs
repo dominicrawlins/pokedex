@@ -19,7 +19,7 @@ namespace pokedex.Controllers
         }
 
         [HttpGet]
-        public async Task<PokemonEndpointResponse> Get()
+        public async Task<IEnumerable<Pokemon>> Get()
         {
             var service = new PokeApiService();
 

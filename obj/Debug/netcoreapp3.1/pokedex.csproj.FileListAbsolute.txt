@@ -17,3 +17,5 @@
 /Users/dominicrawlins/code/pokedex/obj/Debug/netcoreapp3.1/pokedex.dll
 /Users/dominicrawlins/code/pokedex/obj/Debug/netcoreapp3.1/pokedex.pdb
 /Users/dominicrawlins/code/pokedex/obj/Debug/netcoreapp3.1/pokedex.genruntimeconfig.cache
+/Users/dominicrawlins/code/pokedex/bin/Debug/netcoreapp3.1/Newtonsoft.Json.dll
+/Users/dominicrawlins/code/pokedex/obj/Debug/netcoreapp3.1/pokedex.csproj.CopyComplete
