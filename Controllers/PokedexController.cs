@@ -23,7 +23,7 @@ namespace pokedex.Controllers
         {
             var service = new PokeApiService();
 
-            return await service.GetAllPokemon();
+            return await service.GetAllTranslatedPokemon();
         }
     }
 }

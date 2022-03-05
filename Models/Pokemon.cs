@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class Pokemon{
     public string Name { get; private set; }
-    public string Description { get; private set; }
+    public string Description { get; set; }
     public string Habitat { get; private set; }
     public bool IsLegendary { get; private set; }
 

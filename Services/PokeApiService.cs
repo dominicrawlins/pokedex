@@ -7,8 +7,10 @@ using System;
 
 public class PokeApiService{
     private readonly HttpClient httpClient;
+    private readonly YodaTranslationService yodaTranslator;
     public PokeApiService(){
         httpClient = new HttpClient();
+        yodaTranslator = new YodaTranslationService();
     }
 
     public async Task<IEnumerable<Pokemon>> GetAllPokemon(){
@@ -23,6 +25,12 @@ public class PokeApiService{
         await Task.WhenAll(pokemonTasks);
 
         return pokemonTasks.Select(task => task.Result);        
+    }
+
+    public async Task<IEnumerable<Pokemon>> GetAllTranslatedPokemon(){
+        var pokemons = await GetAllPokemon();
+        pokemons = await yodaTranslator.TranslateAllPokemon(pokemons);
+        return pokemons;
     }
 
     private async Task<Pokemon> GetPokemonTask(string url){
