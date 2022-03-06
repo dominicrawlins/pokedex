@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Linq;
-using System;
 
-public class PokeApiService{
+public class PokeApiService : IPokeApiService{
     private readonly HttpClient httpClient;
-    private readonly YodaTranslationService yodaTranslator;
-    public PokeApiService(){
+    private readonly ITranslationService translator;
+    public PokeApiService(ITranslationService translator){
         httpClient = new HttpClient();
-        yodaTranslator = new YodaTranslationService();
+        this.translator = translator;
     }
 
     public async Task<IEnumerable<Pokemon>> GetAllPokemon(){
@@ -29,7 +28,7 @@ public class PokeApiService{
 
     public async Task<IEnumerable<Pokemon>> GetAllTranslatedPokemon(){
         var pokemons = await GetAllPokemon();
-        pokemons = await yodaTranslator.TranslateAllPokemon(pokemons);
+        pokemons = await translator.TranslateAllPokemon(pokemons);
         return pokemons;
     }
 

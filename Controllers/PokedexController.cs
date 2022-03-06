@@ -11,19 +11,19 @@ namespace pokedex.Controllers
     [Route("pokedex")]
     public class PokedexController : ControllerBase
     {
-        private readonly ILogger<PokedexController> _logger;
+        private readonly ILogger<PokedexController> logger;
+        private readonly IPokeApiService pokeApiService;
 
-        public PokedexController(ILogger<PokedexController> logger)
+        public PokedexController(ILogger<PokedexController> logger, IPokeApiService pokeApiService)
         {
-            _logger = logger;
+            this.logger = logger;
+            this.pokeApiService = pokeApiService;
         }
 
         [HttpGet]
         public async Task<IEnumerable<Pokemon>> Get()
         {
-            var service = new PokeApiService();
-
-            return await service.GetAllTranslatedPokemon();
+            return await pokeApiService.GetAllTranslatedPokemon();
         }
     }
 }

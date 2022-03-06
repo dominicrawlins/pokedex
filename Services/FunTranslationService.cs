@@ -5,13 +5,12 @@ using System.Linq;
 using System.Net.Http.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 
-public class YodaTranslationService{
+public class FunTranslationService : ITranslationService{
     private readonly HttpClient httpClient;
     private static Dictionary<string, string> cachedTranslations;
 
-    public YodaTranslationService(){
+    public FunTranslationService(){
         httpClient = new HttpClient();
         cachedTranslations = new Dictionary<string, string>();
     }
