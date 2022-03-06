@@ -20,6 +20,7 @@ namespace pokedex
             services.AddControllers();
             services.AddSingleton<ITranslationService, FunTranslationService>();
             services.AddSingleton<IPokeApiService, PokeApiService>();
+            services.AddSingleton(typeof(IMemoryCache<>), typeof(MemoryCache<>)); 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -5,10 +5,12 @@ using System.Linq;
 using System.Net.Http.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 
 public class FunTranslationService : ITranslationService{
     private readonly HttpClient httpClient;
     private static Dictionary<string, string> cachedTranslations;
+    private static DateTime cacheExpiry;
 
     public FunTranslationService(){
         httpClient = new HttpClient();
@@ -17,15 +19,21 @@ public class FunTranslationService : ITranslationService{
 
     public async Task<IEnumerable<Pokemon>> TranslateAllPokemon(IEnumerable<Pokemon> pokemons){
         var translationsNeeded = pokemons.Select(p => p.Description);
-        var successful = await UpdateCache(translationsNeeded);
+        if(cacheExpiry < DateTime.UtcNow){
+            await UpdateCache(translationsNeeded);
+        }        
+        UpdatePokemonDescriptions(pokemons.ToList());
         
-        return successful ? UpdatePokemonDescriptions(pokemons.ToList()) : pokemons;
+        return pokemons;
     }
 
-    private async Task<bool> UpdateCache(IEnumerable<string> translationsNeeded){
-        (var success, var translations) = await GetTranslations(translationsNeeded);
-        if(!success){
-            return false;;
+    private async Task UpdateCache(IEnumerable<string> translationsNeeded){
+        cachedTranslations = new Dictionary<string, string>();
+        cacheExpiry = DateTime.UtcNow.AddHours(1);
+
+        var translations = await GetTranslations(translationsNeeded);
+        if(translations == null){
+            return;
         }
 
         for(int i = 0; i < translations.Count; i++){
@@ -39,11 +47,9 @@ public class FunTranslationService : ITranslationService{
 
             cachedTranslations.Add(originalText, (string)translation);
         }
-
-        return true;
     }
 
-    private async Task<(bool, JArray)> GetTranslations(IEnumerable<string> translationsNeeded){
+    private async Task<JArray> GetTranslations(IEnumerable<string> translationsNeeded){
         var requestMessage = new HttpRequestMessage();
         requestMessage.Method = HttpMethod.Post;
         requestMessage.RequestUri = new System.Uri("https://api.funtranslations.com/translate/yoda");
@@ -52,19 +58,21 @@ public class FunTranslationService : ITranslationService{
         var response = await httpClient.SendAsync( requestMessage);
 
         if(response.StatusCode != System.Net.HttpStatusCode.OK){
-            return (false, null);
+            return null;
         }
 
 
         var responseContent = await response.Content.ReadAsStringAsync();
         var jsonResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
 
-        return (true, jsonResponse.contents.translated);
+        return jsonResponse.contents.translated;
     }
 
     private List<Pokemon> UpdatePokemonDescriptions(List<Pokemon> pokemons){
         foreach(var pokemon in pokemons){
-            pokemon.Description = cachedTranslations[pokemon.Description];
+            if(cachedTranslations.ContainsKey(pokemon.Description)){
+                pokemon.Description = cachedTranslations[pokemon.Description];
+            }            
         }
 
         return pokemons;

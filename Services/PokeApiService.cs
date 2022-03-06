@@ -7,12 +7,19 @@ using System.Linq;
 public class PokeApiService : IPokeApiService{
     private readonly HttpClient httpClient;
     private readonly ITranslationService translator;
-    public PokeApiService(ITranslationService translator){
+    private readonly IMemoryCache<IEnumerable<Pokemon>> pokemonCache;
+
+    public PokeApiService(ITranslationService translator, IMemoryCache<IEnumerable<Pokemon>> pokemonCache){
         httpClient = new HttpClient();
         this.translator = translator;
+        this.pokemonCache = pokemonCache;
     }
 
     public async Task<IEnumerable<Pokemon>> GetAllPokemon(){
+        return await pokemonCache.GetObject(GetAllPokemonFromApi, 10);
+    }
+
+    private async Task<IEnumerable<Pokemon>> GetAllPokemonFromApi(){
         var response = await httpClient.GetAsync("https://pokeapi.co/api/v2/pokemon-species");
         var responseContent = await response.Content.ReadAsStringAsync();
 
@@ -23,7 +30,7 @@ public class PokeApiService : IPokeApiService{
 
         await Task.WhenAll(pokemonTasks);
 
-        return pokemonTasks.Select(task => task.Result);        
+        return pokemonTasks.Select(task => task.Result);   
     }
 
     public async Task<IEnumerable<Pokemon>> GetAllTranslatedPokemon(){
